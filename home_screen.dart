@@ -263,8 +263,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildIconBtn(IconData icon, VoidCallback onTap,
-      {bool badge = false}) {
+  Widget _buildIconBtn(
+    IconData icon,
+    VoidCallback onTap, {
+    bool badge = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Stack(
@@ -369,13 +372,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               // Active status toggle
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: Colors.white.withOpacity(0.4), width: 0.5),
+                    color: Colors.white.withOpacity(0.4),
+                    width: 0.5,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -432,8 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: LinearProgressIndicator(
                   value: _user['xp'] / _user['xpMax'],
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   minHeight: 6,
                 ),
               ),
@@ -446,7 +452,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Text(
                 'Skills: ',
                 style: TextStyle(
-                    fontSize: 11, color: Colors.white.withOpacity(0.7)),
+                  fontSize: 11,
+                  color: Colors.white.withOpacity(0.7),
+                ),
               ),
               Expanded(
                 child: Wrap(
@@ -455,7 +463,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       .map(
                         (s) => Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(20),
@@ -463,9 +473,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Text(
                             s,
                             style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500),
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       )
@@ -502,7 +513,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               color: AppColors.gemini,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -522,7 +537,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.gemini.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
@@ -561,7 +578,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, size: 14, color: AppColors.gemini),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 14,
+                        color: AppColors.gemini,
+                      ),
                     ],
                   ),
                 ),
@@ -577,20 +598,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildStatsRow() {
     return Row(
       children: [
-        _buildStatCard('Missions done', '${_user['missionsCompleted']}',
-            Icons.check_circle_outline, AppColors.teal, AppColors.tealLight),
+        _buildStatCard(
+          'Missions done',
+          '${_user['missionsCompleted']}',
+          Icons.check_circle_outline,
+          AppColors.teal,
+          AppColors.tealLight,
+        ),
         const SizedBox(width: 12),
-        _buildStatCard('Nearby heroes', '${_user['nearbyHeroes']}',
-            Icons.people_outline, AppColors.red, AppColors.redLight),
+        _buildStatCard(
+          'Nearby heroes',
+          '${_user['nearbyHeroes']}',
+          Icons.people_outline,
+          AppColors.red,
+          AppColors.redLight,
+        ),
         const SizedBox(width: 12),
-        _buildStatCard('Your rank', '#42', Icons.leaderboard_outlined,
-            AppColors.amber, AppColors.amberLight),
+        _buildStatCard(
+          'Your rank',
+          '#42',
+          Icons.leaderboard_outlined,
+          AppColors.amber,
+          AppColors.amberLight,
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon,
-      Color color, Color bgColor) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+    Color bgColor,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -685,9 +726,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ─── Alerts List ──────────────────────────────────────────────────────────────
   Widget _buildAlertsList() {
     return Column(
-      children: _nearbyAlerts
-          .map((alert) => _buildAlertCard(alert))
-          .toList(),
+      children: _nearbyAlerts.map((alert) => _buildAlertCard(alert)).toList(),
     );
   }
 
@@ -703,9 +742,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isHigh
-              ? AppColors.red.withOpacity(0.3)
-              : AppColors.border,
+          color: isHigh ? AppColors.red.withOpacity(0.3) : AppColors.border,
           width: isHigh ? 1 : 0.5,
         ),
       ),
@@ -745,7 +782,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: urgencyBg,
                         borderRadius: BorderRadius.circular(6),
@@ -764,22 +803,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 12, color: AppColors.textSecondary),
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 3),
                     Text(
                       alert['location'],
                       style: const TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary),
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(Icons.access_time,
-                        size: 12, color: AppColors.textSecondary),
+                    Icon(
+                      Icons.access_time,
+                      size: 12,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 3),
                     Text(
                       alert['time'],
                       style: const TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary),
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -796,11 +845,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             padding: EdgeInsets.zero,
                           ),
-                          child: const Text('Respond',
-                              style: TextStyle(fontSize: 12)),
+                          child: const Text(
+                            'Respond',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                       ),
                     ),
@@ -810,18 +862,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       height: 32,
                       child: OutlinedButton.icon(
                         onPressed: () => _showGeminiChat(context),
-                        icon: const Icon(Icons.auto_awesome,
-                            size: 12, color: AppColors.gemini),
-                        label: const Text('AI Guide',
-                            style: TextStyle(
-                                fontSize: 11, color: AppColors.gemini)),
+                        icon: const Icon(
+                          Icons.auto_awesome,
+                          size: 12,
+                          color: AppColors.gemini,
+                        ),
+                        label: const Text(
+                          'AI Guide',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.gemini,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
-                              color: AppColors.gemini.withOpacity(0.4)),
+                            color: AppColors.gemini.withOpacity(0.4),
+                          ),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                         ),
                       ),
                     ),
@@ -838,8 +898,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // ─── Training Tasks ───────────────────────────────────────────────────────────
   Widget _buildTrainingTasks() {
     return Column(
-      children:
-          _dailyTasks.map((task) => _buildTaskRow(task)).toList(),
+      children: _dailyTasks.map((task) => _buildTaskRow(task)).toList(),
     );
   }
 
@@ -867,8 +926,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: (task['color'] as Color).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(task['icon'] as IconData,
-                  size: 20, color: task['color'] as Color),
+              child: Icon(
+                task['icon'] as IconData,
+                size: 20,
+                color: task['color'] as Color,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -898,7 +960,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text(
                         task['duration'],
                         style: const TextStyle(
-                            fontSize: 11, color: AppColors.textSecondary),
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -910,7 +974,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         value: progress,
                         backgroundColor: AppColors.border,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            task['color'] as Color),
+                          task['color'] as Color,
+                        ),
                         minHeight: 4,
                       ),
                     ),
@@ -921,36 +986,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(width: 8),
             if (done)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.tealLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('Done',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.teal,
-                        fontWeight: FontWeight.w600)),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.teal,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               )
             else if (locked)
-              const Icon(Icons.lock_outline,
-                  size: 18, color: AppColors.textSecondary)
+              const Icon(
+                Icons.lock_outline,
+                size: 18,
+                color: AppColors.textSecondary,
+              )
             else
               GestureDetector(
                 onTap: () {},
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.redLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text('Start',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.red,
-                          fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'Start',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -999,8 +1077,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             bottom: 10,
             left: 14,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.92),
                 borderRadius: BorderRadius.circular(8),
@@ -1008,8 +1085,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
               child: const Text(
                 'Live coverage map — Chennai',
-                style:
-                    TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
               ),
             ),
           ),
@@ -1017,8 +1093,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             bottom: 10,
             right: 14,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: AppColors.redLight,
                 borderRadius: BorderRadius.circular(8),
@@ -1026,9 +1101,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: const Text(
                 '1 incident nearby',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.red,
-                    fontWeight: FontWeight.w600),
+                  fontSize: 11,
+                  color: AppColors.red,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -1049,9 +1125,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             border: Border.all(color: Colors.white, width: 2),
             boxShadow: [
               BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2))
+                color: color.withOpacity(0.4),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
           child: Icon(icon, size: 14, color: Colors.white),
@@ -1059,15 +1136,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (label.isNotEmpty)
           Container(
             margin: const EdgeInsets.only(top: 2),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Text(label,
-                style:
-                    const TextStyle(fontSize: 9, color: Colors.white)),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 9, color: Colors.white),
+            ),
           ),
       ],
     );
@@ -1087,9 +1164,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           label: const Text(
             'SOS',
             style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 15),
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+            ),
           ),
         ),
       ),
@@ -1112,7 +1190,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             _navItem(Icons.map_outlined, Icons.map, 'Map', 1),
             const SizedBox(width: 48), // SOS button space
             _navItem(
-                Icons.fitness_center_outlined, Icons.fitness_center, 'Train', 2),
+              Icons.fitness_center_outlined,
+              Icons.fitness_center,
+              'Train',
+              2,
+            ),
             _navItem(Icons.person_outline, Icons.person, 'Profile', 3),
           ],
         ),
@@ -1121,7 +1203,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _navItem(
-      IconData outlineIcon, IconData filledIcon, String label, int index) {
+    IconData outlineIcon,
+    IconData filledIcon,
+    String label,
+    int index,
+  ) {
     final bool selected = _selectedIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
@@ -1167,9 +1253,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Icon(Icons.sos, color: AppColors.red),
             SizedBox(width: 8),
-            Text('Send SOS Alert',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700, color: AppColors.red)),
+            Text(
+              'Send SOS Alert',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.red,
+              ),
+            ),
           ],
         ),
         content: const Text(
@@ -1179,18 +1269,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.red,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            child: const Text('Send SOS',
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Send SOS',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -1219,13 +1314,15 @@ class MapGridPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     canvas.drawLine(
-        Offset(0, size.height * 0.5),
-        Offset(size.width, size.height * 0.5),
-        roadPaint);
+      Offset(0, size.height * 0.5),
+      Offset(size.width, size.height * 0.5),
+      roadPaint,
+    );
     canvas.drawLine(
-        Offset(size.width * 0.4, 0),
-        Offset(size.width * 0.4, size.height),
-        roadPaint);
+      Offset(size.width * 0.4, 0),
+      Offset(size.width * 0.4, size.height),
+      roadPaint,
+    );
   }
 
   @override
@@ -1322,8 +1419,11 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
                     color: AppColors.gemini,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.auto_awesome,
-                      color: Colors.white, size: 18),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Column(
@@ -1340,14 +1440,19 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
                     Text(
                       'Emergency assistance powered by Gemini',
                       style: TextStyle(
-                          fontSize: 11, color: AppColors.textSecondary),
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
                 const Spacer(),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close, color: AppColors.textSecondary),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -1372,10 +1477,11 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
           ),
           // Input
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+              border: Border(
+                top: BorderSide(color: AppColors.border, width: 0.5),
+              ),
             ),
             child: Row(
               children: [
@@ -1386,11 +1492,15 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
                     decoration: InputDecoration(
                       hintText: 'Ask about emergency steps...',
                       hintStyle: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 13),
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                       filled: true,
                       fillColor: AppColors.background,
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -1409,8 +1519,11 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
                       color: AppColors.gemini,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.send_rounded,
-                        color: Colors.white, size: 18),
+                    child: const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -1428,16 +1541,19 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.72),
+          maxWidth: MediaQuery.of(context).size.width * 0.72,
+        ),
         decoration: BoxDecoration(
           color: isUser ? AppColors.gemini : AppColors.geminiLight,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(14),
             topRight: const Radius.circular(14),
-            bottomLeft:
-                isUser ? const Radius.circular(14) : const Radius.circular(4),
-            bottomRight:
-                isUser ? const Radius.circular(4) : const Radius.circular(14),
+            bottomLeft: isUser
+                ? const Radius.circular(14)
+                : const Radius.circular(4),
+            bottomRight: isUser
+                ? const Radius.circular(4)
+                : const Radius.circular(14),
           ),
         ),
         child: Text(
@@ -1467,9 +1583,10 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
           children: [
             Icon(Icons.auto_awesome, size: 14, color: AppColors.gemini),
             SizedBox(width: 6),
-            Text('Gemini is thinking...',
-                style:
-                    TextStyle(fontSize: 12, color: AppColors.gemini)),
+            Text(
+              'Gemini is thinking...',
+              style: TextStyle(fontSize: 12, color: AppColors.gemini),
+            ),
           ],
         ),
       ),
