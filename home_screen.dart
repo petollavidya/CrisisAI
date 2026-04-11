@@ -1,4 +1,6 @@
+// home_screen.dart
 import 'package:flutter/material.dart';
+import 'profile.dart';
 
 void main() {
   runApp(const CitizenHeroApp());
@@ -15,10 +17,47 @@ class CitizenHeroApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE24B4A)),
         useMaterial3: true,
+        fontFamily: 'Roboto',
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
+}
+
+// ─── App-wide shared data store ───────────────────────────────────────────────
+class AppData {
+  static Map<String, dynamic> volunteerProfile = {
+    'name': '',
+    'email': '',
+    'username': '',
+    'contactNumber': '',
+    'age': '',
+    'address': '',
+    'gender': '',
+    'skills': <String>[],
+    'initials': '',
+    'level': 3,
+    'xp': 680,
+    'xpMax': 1000,
+    'missionsCompleted': 14,
+    'nearbyHeroes': 7,
+    'rank': 42,
+    'isActive': true,
+  };
+
+  static Map<String, dynamic> authorisedProfile = {
+    'name': '',
+    'email': '',
+    'username': '',
+    'id': '',
+    'password': '',
+    'department': '',
+    'badgeId': 'AUTH-001',
+    'jurisdiction': 'Chennai District',
+    'initials': '',
+  };
+
+  static String loginType = 'volunteer'; // 'volunteer' or 'authorised'
 }
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
@@ -35,12 +74,596 @@ class AppColors {
   static const Color border = Color(0xFFE8E8E8);
   static const Color background = Color(0xFFF7F6F3);
   static const Color white = Colors.white;
-  // Gemini brand color
   static const Color gemini = Color(0xFF4285F4);
   static const Color geminiLight = Color(0xFFE8F0FE);
+  static const Color blue = Color(0xFF1D4ED8);
+  static const Color blueLight = Color(0xFFEFF6FF);
 }
 
-// ─── Home Screen ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+//  LOGIN SCREEN
+// ══════════════════════════════════════════════════════════════════════════════
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
+  String _selectedRole = ''; // '' | 'volunteer' | 'authorised'
+  final _volunteerEmailCtrl = TextEditingController();
+  final _volunteerPasswordCtrl = TextEditingController();
+  final _authIdCtrl = TextEditingController();
+  final _authPasswordCtrl = TextEditingController();
+  final _authDeptCtrl = TextEditingController();
+  final _authNameCtrl = TextEditingController();
+  final _authEmailCtrl = TextEditingController();
+  bool _obscureVPass = true;
+  bool _obscureAPass = true;
+  bool _isLoading = false;
+
+  late AnimationController _animCtrl;
+  late Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+    _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOut);
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    _volunteerEmailCtrl.dispose();
+    _volunteerPasswordCtrl.dispose();
+    _authIdCtrl.dispose();
+    _authPasswordCtrl.dispose();
+    _authDeptCtrl.dispose();
+    _authNameCtrl.dispose();
+    _authEmailCtrl.dispose();
+    super.dispose();
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return 'U';
+  }
+
+  void _loginVolunteer() async {
+    if (_volunteerEmailCtrl.text.trim().isEmpty ||
+        _volunteerPasswordCtrl.text.trim().isEmpty) {
+      _showError('Please enter your email and password.');
+      return;
+    }
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 800));
+    final email = _volunteerEmailCtrl.text.trim();
+    final name = email.split('@')[0];
+    AppData.volunteerProfile['email'] = email;
+    AppData.volunteerProfile['name'] = name;
+    AppData.volunteerProfile['initials'] = _initials(name);
+    AppData.volunteerProfile['username'] = name.toLowerCase().replaceAll(
+      ' ',
+      '_',
+    );
+    AppData.loginType = 'volunteer';
+    setState(() => _isLoading = false);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
+
+  void _loginAuthorised() async {
+    if (_authNameCtrl.text.trim().isEmpty ||
+        _authEmailCtrl.text.trim().isEmpty ||
+        _authIdCtrl.text.trim().isEmpty ||
+        _authPasswordCtrl.text.trim().isEmpty ||
+        _authDeptCtrl.text.trim().isEmpty) {
+      _showError('Please fill all fields.');
+      return;
+    }
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 800));
+    final name = _authNameCtrl.text.trim();
+    final email = _authEmailCtrl.text.trim();
+    AppData.authorisedProfile['name'] = name;
+    AppData.authorisedProfile['email'] = email;
+    AppData.authorisedProfile['id'] = _authIdCtrl.text.trim();
+    AppData.authorisedProfile['password'] = _authPasswordCtrl.text.trim();
+    AppData.authorisedProfile['department'] = _authDeptCtrl.text.trim();
+    AppData.authorisedProfile['initials'] = _initials(name);
+    AppData.authorisedProfile['username'] = email
+        .split('@')[0]
+        .toLowerCase()
+        .replaceAll(' ', '_');
+    AppData.loginType = 'authorised';
+    setState(() => _isLoading = false);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.red),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: FadeTransition(
+        opacity: _fadeAnim,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Logo area
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: AppColors.red,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.red.withOpacity(0.35),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.shield,
+                          color: Colors.white,
+                          size: 38,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Citizen Hero Network',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Empowering communities, saving lives',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                // Role selection
+                if (_selectedRole.isEmpty) ...[
+                  const Text(
+                    'Choose your role to continue',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _roleCard(
+                    icon: Icons.volunteer_activism,
+                    color: AppColors.teal,
+                    bg: AppColors.tealLight,
+                    title: 'Volunteer Login',
+                    subtitle: 'Join missions, earn XP, help your community',
+                    onTap: () => setState(() => _selectedRole = 'volunteer'),
+                  ),
+                  const SizedBox(height: 14),
+                  _roleCard(
+                    icon: Icons.verified_user_rounded,
+                    color: AppColors.blue,
+                    bg: AppColors.blueLight,
+                    title: 'Authorised Person Login',
+                    subtitle: 'Officers, coordinators & authorised personnel',
+                    onTap: () => setState(() => _selectedRole = 'authorised'),
+                  ),
+                ],
+
+                // Volunteer login form
+                if (_selectedRole == 'volunteer') ...[
+                  _backButton(),
+                  const SizedBox(height: 8),
+                  _sectionHeader(
+                    'Volunteer Login',
+                    Icons.volunteer_activism,
+                    AppColors.teal,
+                  ),
+                  const SizedBox(height: 24),
+                  _inputField(
+                    controller: _volunteerEmailCtrl,
+                    label: 'Email Address',
+                    hint: 'Enter your email',
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 14),
+                  _passwordField(
+                    controller: _volunteerPasswordCtrl,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    obscure: _obscureVPass,
+                    onToggle: () =>
+                        setState(() => _obscureVPass = !_obscureVPass),
+                  ),
+                  const SizedBox(height: 28),
+                  _loginButton(
+                    label: 'Sign In as Volunteer',
+                    color: AppColors.teal,
+                    isLoading: _isLoading,
+                    onTap: _loginVolunteer,
+                  ),
+                ],
+
+                // Authorised login form
+                if (_selectedRole == 'authorised') ...[
+                  _backButton(),
+                  const SizedBox(height: 8),
+                  _sectionHeader(
+                    'Authorised Person Login',
+                    Icons.verified_user_rounded,
+                    AppColors.blue,
+                  ),
+                  const SizedBox(height: 24),
+                  _inputField(
+                    controller: _authNameCtrl,
+                    label: 'Full Name',
+                    hint: 'Enter your full name',
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: 14),
+                  _inputField(
+                    controller: _authEmailCtrl,
+                    label: 'Email Address',
+                    hint: 'Enter your email',
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 14),
+                  _inputField(
+                    controller: _authIdCtrl,
+                    label: 'Officer / Staff ID',
+                    hint: 'Enter your official ID',
+                    icon: Icons.badge_outlined,
+                  ),
+                  const SizedBox(height: 14),
+                  _passwordField(
+                    controller: _authPasswordCtrl,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    obscure: _obscureAPass,
+                    onToggle: () =>
+                        setState(() => _obscureAPass = !_obscureAPass),
+                  ),
+                  const SizedBox(height: 14),
+                  _inputField(
+                    controller: _authDeptCtrl,
+                    label: 'Department',
+                    hint: 'e.g. Police, Fire Dept, Medical',
+                    icon: Icons.account_balance_outlined,
+                  ),
+                  const SizedBox(height: 28),
+                  _loginButton(
+                    label: 'Sign In as Authorised Person',
+                    color: AppColors.blue,
+                    isLoading: _isLoading,
+                    onTap: _loginAuthorised,
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _backButton() {
+    return GestureDetector(
+      onTap: () => setState(() => _selectedRole = ''),
+      child: Row(
+        children: [
+          Icon(Icons.arrow_back_ios, size: 16, color: AppColors.textSecondary),
+          const SizedBox(width: 4),
+          Text(
+            'Back to role selection',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, IconData icon, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _roleCard({
+    required IconData icon,
+    required Color color,
+    required Color bg,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withOpacity(0.25), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: bg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: color, size: 26),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _inputField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
+            prefixIcon: Icon(icon, size: 18, color: AppColors.textSecondary),
+            filled: true,
+            fillColor: AppColors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _passwordField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required bool obscure,
+    required VoidCallback onToggle,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscure,
+          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
+            prefixIcon: const Icon(
+              Icons.lock_outline,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
+            suffixIcon: GestureDetector(
+              onTap: onToggle,
+              child: Icon(
+                obscure
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            filled: true,
+            fillColor: AppColors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _loginButton({
+    required String label,
+    required Color color,
+    required bool isLoading,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          elevation: 4,
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  HOME SCREEN
+// ══════════════════════════════════════════════════════════════════════════════
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -56,18 +679,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<double> _alertPulse;
 
-  // Mock user data
-  final Map<String, dynamic> _user = {
-    'name': 'Ravi Kumar',
-    'initials': 'RK',
-    'level': 3,
-    'xp': 680,
-    'xpMax': 1000,
-    'missionsCompleted': 14,
-    'nearbyHeroes': 7,
-    'skills': ['First Aid', 'CPR', 'Fire Safety'],
-    'isActive': true,
-  };
+  Map<String, dynamic> get _user => AppData.loginType == 'volunteer'
+      ? AppData.volunteerProfile
+      : AppData.authorisedProfile;
 
   final List<Map<String, dynamic>> _nearbyAlerts = [
     {
@@ -146,53 +760,69 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  Widget _buildCurrentTab() {
+    switch (_selectedIndex) {
+      case 3:
+        if (AppData.loginType == 'volunteer') {
+          return VolunteerProfileTab(user: AppData.volunteerProfile);
+        } else {
+          return AuthorisedPersonProfileTab(officer: AppData.authorisedProfile);
+        }
+      default:
+        return _buildHomeContent();
+    }
+  }
+
+  Widget _buildHomeContent() {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          _buildAppBar(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  _buildHeroCard(),
+                  const SizedBox(height: 20),
+                  _buildGeminiInsightCard(),
+                  const SizedBox(height: 20),
+                  _buildStatsRow(),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle('Nearby emergencies', showBadge: true),
+                  const SizedBox(height: 12),
+                  _buildAlertsList(),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle("Today's training"),
+                  const SizedBox(height: 12),
+                  _buildTrainingTasks(),
+                  const SizedBox(height: 24),
+                  _buildLiveMapCard(),
+                  const SizedBox(height: 100),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            _buildAppBar(),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildHeroCard(),
-                    const SizedBox(height: 20),
-                    _buildGeminiInsightCard(),
-                    const SizedBox(height: 20),
-                    _buildStatsRow(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Nearby emergencies', showBadge: true),
-                    const SizedBox(height: 12),
-                    _buildAlertsList(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle("Today's training"),
-                    const SizedBox(height: 12),
-                    _buildTrainingTasks(),
-                    const SizedBox(height: 24),
-                    _buildLiveMapCard(),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _buildCurrentTab(),
       bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: _buildSOSButton(),
+      floatingActionButton: _selectedIndex == 0 ? _buildSOSButton() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  // ─── App Bar ─────────────────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return SliverAppBar(
       backgroundColor: AppColors.background,
@@ -210,7 +840,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Good morning,',
                   style: TextStyle(
                     fontSize: 12,
@@ -218,7 +848,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 Text(
-                  _user['name'],
+                  _user['name'] ?? 'Hero',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -229,12 +859,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             Row(
               children: [
-                // Notification bell
                 _buildIconBtn(Icons.notifications_outlined, () {}, badge: true),
                 const SizedBox(width: 8),
-                // Avatar
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => setState(() => _selectedIndex = 3),
                   child: Container(
                     width: 40,
                     height: 40,
@@ -245,7 +873,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     child: Center(
                       child: Text(
-                        _user['initials'],
+                        _user['initials'] ?? 'U',
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -301,8 +929,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Hero Profile Card ────────────────────────────────────────────────────────
   Widget _buildHeroCard() {
+    final skills =
+        (_user['skills'] as List<dynamic>?)?.cast<String>() ?? ['Volunteer'];
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -320,7 +949,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           Row(
             children: [
-              // Avatar
               Container(
                 width: 52,
                 height: 52,
@@ -330,7 +958,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 child: Center(
                   child: Text(
-                    _user['initials'],
+                    _user['initials'] ?? 'U',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -349,7 +977,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const Icon(Icons.shield, color: Colors.white, size: 14),
                         const SizedBox(width: 4),
                         Text(
-                          'Hero Level ${_user['level']}',
+                          AppData.loginType == 'volunteer'
+                              ? 'Hero Level ${_user['level']}'
+                              : 'Authorised Officer',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.white70,
@@ -359,9 +989,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      'Active Volunteer',
-                      style: TextStyle(
+                    Text(
+                      AppData.loginType == 'volunteer'
+                          ? 'Active Volunteer'
+                          : (_user['department'] ?? 'Department'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -370,7 +1002,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              // Active status toggle
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -408,89 +1039,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // XP Progress
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'XP Progress',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.8),
+          if (AppData.loginType == 'volunteer') ...[
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'XP Progress',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${_user['xp']} / ${_user['xpMax']} XP',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    Text(
+                      '${_user['xp']} / ${_user['xpMax']} XP',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (_user['xp'] as int) / (_user['xpMax'] as int),
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
+                    ),
+                    minHeight: 6,
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: _user['xp'] / _user['xpMax'],
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                  minHeight: 6,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // Skills
-          Row(
-            children: [
-              Text(
-                'Skills: ',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.white.withOpacity(0.7),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Text(
+                  'Skills: ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Wrap(
-                  spacing: 6,
-                  children: (_user['skills'] as List<String>)
-                      .map(
-                        (s) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            s,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    children: skills
+                        .map(
+                          (s) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              s,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        )
+                        .toList(),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 
-  // ─── Gemini AI Insight Card ───────────────────────────────────────────────────
   Widget _buildGeminiInsightCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -505,7 +1136,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gemini icon
           Container(
             width: 36,
             height: 36,
@@ -567,8 +1197,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => _showGeminiChat(context),
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Text(
                         'Ask Gemini for guidance',
                         style: TextStyle(
@@ -594,13 +1224,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Stats Row ────────────────────────────────────────────────────────────────
   Widget _buildStatsRow() {
     return Row(
       children: [
         _buildStatCard(
           'Missions done',
-          '${_user['missionsCompleted']}',
+          '${_user['missionsCompleted'] ?? 0}',
           Icons.check_circle_outline,
           AppColors.teal,
           AppColors.tealLight,
@@ -608,7 +1237,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         const SizedBox(width: 12),
         _buildStatCard(
           'Nearby heroes',
-          '${_user['nearbyHeroes']}',
+          '${_user['nearbyHeroes'] ?? 0}',
           Icons.people_outline,
           AppColors.red,
           AppColors.redLight,
@@ -616,7 +1245,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         const SizedBox(width: 12),
         _buildStatCard(
           'Your rank',
-          '#42',
+          '#${_user['rank'] ?? 42}',
           Icons.leaderboard_outlined,
           AppColors.amber,
           AppColors.amberLight,
@@ -675,7 +1304,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Section Title ────────────────────────────────────────────────────────────
   Widget _buildSectionTitle(String title, {bool showBadge = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -723,7 +1351,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Alerts List ──────────────────────────────────────────────────────────────
   Widget _buildAlertsList() {
     return Column(
       children: _nearbyAlerts.map((alert) => _buildAlertCard(alert)).toList(),
@@ -803,7 +1430,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_on_outlined,
                       size: 12,
                       color: AppColors.textSecondary,
@@ -817,7 +1444,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(
+                    const Icon(
                       Icons.access_time,
                       size: 12,
                       color: AppColors.textSecondary,
@@ -857,7 +1484,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Gemini AI guide button
                     SizedBox(
                       height: 32,
                       child: OutlinedButton.icon(
@@ -895,7 +1521,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Training Tasks ───────────────────────────────────────────────────────────
   Widget _buildTrainingTasks() {
     return Column(
       children: _dailyTasks.map((task) => _buildTaskRow(task)).toList(),
@@ -1037,7 +1662,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Live Map Card ────────────────────────────────────────────────────────────
   Widget _buildLiveMapCard() {
     return Container(
       height: 160,
@@ -1048,7 +1672,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: Stack(
         children: [
-          // Map grid placeholder
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: CustomPaint(
@@ -1056,7 +1679,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               painter: MapGridPainter(),
             ),
           ),
-          // Map pins
           Positioned(
             left: MediaQuery.of(context).size.width * 0.35,
             top: 80,
@@ -1072,7 +1694,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             top: 60,
             child: _mapPin(AppColors.teal, Icons.shield, ''),
           ),
-          // Overlay label
           Positioned(
             bottom: 10,
             left: 14,
@@ -1150,7 +1771,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── SOS FAB ──────────────────────────────────────────────────────────────────
   Widget _buildSOSButton() {
     return AnimatedBuilder(
       animation: _alertPulse,
@@ -1174,7 +1794,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Bottom Nav ───────────────────────────────────────────────────────────────
   Widget _buildBottomNav() {
     return BottomAppBar(
       color: AppColors.white,
@@ -1188,7 +1807,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             _navItem(Icons.home_outlined, Icons.home, 'Home', 0),
             _navItem(Icons.map_outlined, Icons.map, 'Map', 1),
-            const SizedBox(width: 48), // SOS button space
+            const SizedBox(width: 48),
             _navItem(
               Icons.fitness_center_outlined,
               Icons.fitness_center,
@@ -1233,7 +1852,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── Gemini Chat Bottom Sheet ─────────────────────────────────────────────────
   void _showGeminiChat(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -1243,7 +1861,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─── SOS Dialog ───────────────────────────────────────────────────────────────
   void _showSOSDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -1300,19 +1917,16 @@ class MapGridPainter extends CustomPainter {
     final paint = Paint()
       ..color = const Color(0xFFE8E8E8)
       ..strokeWidth = 0.5;
-
     for (double x = 0; x <= size.width; x += 40) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
     for (double y = 0; y <= size.height; y += 40) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
-
     final roadPaint = Paint()
       ..color = const Color(0xFFD0D0D0)
       ..strokeWidth = 6
       ..strokeCap = StrokeCap.round;
-
     canvas.drawLine(
       Offset(0, size.height * 0.5),
       Offset(size.width, size.height * 0.5),
@@ -1332,7 +1946,6 @@ class MapGridPainter extends CustomPainter {
 // ─── Gemini Chat Bottom Sheet ─────────────────────────────────────────────────
 class GeminiChatSheet extends StatefulWidget {
   const GeminiChatSheet({super.key});
-
   @override
   State<GeminiChatSheet> createState() => _GeminiChatSheetState();
 }
@@ -1358,11 +1971,7 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
       _isTyping = true;
     });
     _scrollDown();
-
-    // TODO: Replace with real Gemini API call
-    // final response = await GeminiService.chat(text);
     await Future.delayed(const Duration(seconds: 1));
-
     setState(() {
       _isTyping = false;
       _messages.add({
@@ -1396,7 +2005,6 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
       ),
       child: Column(
         children: [
-          // Handle
           const SizedBox(height: 12),
           Container(
             width: 40,
@@ -1407,7 +2015,6 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          // Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -1459,7 +2066,6 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
           ),
           const SizedBox(height: 12),
           const Divider(height: 1),
-          // Messages
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -1470,12 +2076,10 @@ class _GeminiChatSheetState extends State<GeminiChatSheet> {
                   return _buildTypingIndicator();
                 }
                 final msg = _messages[i];
-                final isUser = msg['role'] == 'user';
-                return _buildMessage(msg['text']!, isUser);
+                return _buildMessage(msg['text']!, msg['role'] == 'user');
               },
             ),
           ),
-          // Input
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
